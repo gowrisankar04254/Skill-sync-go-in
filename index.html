@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="light">
 <head>
@@ -58,6 +57,11 @@
                 <button onclick="toggleDarkMode()" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Theme">
                     <i id="themeIcon" class="fa-solid fa-moon text-xs text-slate-600 dark:text-slate-300"></i>
                 </button>
+
+                <!-- Admin Console Link -->
+                <a href="admin.html" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Admin Console">
+                    <i class="fa-solid fa-user-gear text-xs text-slate-600 dark:text-slate-300"></i>
+                </a>
 
                 <!-- Auth / Dashboard Status -->
                 <div id="authNavContainer">
@@ -126,7 +130,7 @@
         <p>&copy; 2026 Go-Interactive Services. All rights reserved. SkillSync Architecture.</p>
     </footer>
 
-    <!-- Login Modal (2-Day Session Required) -->
+    <!-- Login Modal -->
     <div id="loginModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-3">
         <div class="bg-white dark:bg-slate-900 rounded-xl max-w-xs w-full p-4 shadow-xl border border-slate-200 dark:border-slate-800 space-y-3 relative">
             <button onclick="closeLoginModal()" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
@@ -138,7 +142,7 @@
                     <i class="fa-solid fa-user-lock"></i>
                 </div>
                 <h3 class="text-xs font-bold">Authentication Required</h3>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">Enter username & password to access dashboard. Valid for 2 days.</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">Enter username & password to access dashboard.</p>
             </div>
 
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-2.5">
@@ -174,11 +178,6 @@
                 </div>
             </div>
 
-            <div class="bg-blue-50 dark:bg-slate-800/60 p-2.5 rounded-lg text-[10px] text-slate-600 dark:text-slate-300 space-y-1">
-                <p class="font-semibold text-blue-700 dark:text-blue-400"><i class="fa-solid fa-circle-info mr-1"></i> About Go-Interactive Services:</p>
-                <p>We provide high-performance web portals, secure workflows, and lightweight cloud tools designed for student builders and micro-teams.</p>
-            </div>
-
             <form id="ideaForm" onsubmit="handlePostIdea(event)" class="space-y-2.5">
                 <div class="grid grid-cols-2 gap-2">
                     <div>
@@ -208,30 +207,24 @@
     <!-- Firebase SDK Imports & Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDziwf1qZbYw3OOlNEtZHSvYRpS3tP3d5o",
             authDomain: "skill-sync-go-55e84.firebaseapp.com",
             projectId: "skill-sync-go-55e84",
             storageBucket: "skill-sync-go-55e84.firebasestorage.app",
             messagingSenderId: "341989692734",
-            appId: "1:341989692734:web:43d75efcd59ac417fa886f",
-            measurementId: "G-C5SK36LJ9S"
+            appId: "1:341989692734:web:43d75efcd59ac417fa886f"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        getAnalytics(app);
 
-        // Global State
         window.currentUser = JSON.parse(localStorage.getItem('skillsync_user')) || null;
         window.ideas = [];
         window.notifications = JSON.parse(localStorage.getItem('skillsync_notifs')) || [];
 
-        // Attach Functions to Global Window Scope
         window.toggleDarkMode = () => {
             const html = document.documentElement;
             const icon = document.getElementById('themeIcon');
@@ -252,14 +245,10 @@
         window.handleLogin = (e) => {
             e.preventDefault();
             const username = document.getElementById('authUsername').value.trim();
-            window.currentUser = {
-                username: username,
-                createdAt: new Date().getTime()
-            };
+            window.currentUser = { username: username, createdAt: new Date().getTime() };
             localStorage.setItem('skillsync_user', JSON.stringify(window.currentUser));
             window.closeLoginModal();
             updateAuthUI();
-            addNotification(`Authenticated as ${username}! 2-day credential active.`);
             window.openPostModal();
         };
 
@@ -267,12 +256,10 @@
             localStorage.removeItem('skillsync_user');
             window.currentUser = null;
             updateAuthUI();
-            addNotification("Logged out successfully.");
         };
 
         window.checkAuthAndOpenDashboard = () => {
             if (!window.currentUser) {
-                addNotification("Please authenticate with username and password first.");
                 window.openLoginModal();
                 return;
             }
@@ -281,13 +268,12 @@
 
         window.openPostModal = () => {
             if (!window.currentUser) return;
-            document.getElementById('dashUserWelcome').innerText = `Active Session: ${window.currentUser.username} (Valid 2 Days)`;
+            document.getElementById('dashUserWelcome').innerText = `Active Session: ${window.currentUser.username}`;
             document.getElementById('postModal').classList.remove('hidden');
         };
 
         window.closePostModal = () => document.getElementById('postModal').classList.add('hidden');
 
-        // Post Idea to Firebase Cloud Firestore
         window.handlePostIdea = async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -297,7 +283,7 @@
             const desc = document.getElementById('ideaDesc').value.trim();
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving to Cloud...`;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving...`;
 
             try {
                 await addDoc(collection(db, "ideas"), {
@@ -312,10 +298,9 @@
 
                 window.closePostModal();
                 document.getElementById('ideaForm').reset();
-                addNotification(`Idea "${title}" saved live to Firebase Cloud!`);
             } catch (error) {
                 console.error("Firestore Error:", error);
-                alert("Failed to submit idea. Please check network connection.");
+                alert("Failed to submit. Please check Firebase rules or internet.");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `Send to Admin & Publish to Wall`;
@@ -323,32 +308,8 @@
         };
 
         window.toggleNotifications = () => {
-            const drawer = document.getElementById('notifDrawer');
-            drawer.classList.toggle('hidden');
+            document.getElementById('notifDrawer').classList.toggle('hidden');
         };
-
-        function addNotification(msg) {
-            window.notifications.unshift({ text: msg, time: new Date().toLocaleTimeString() });
-            localStorage.setItem('skillsync_notifs', JSON.stringify(window.notifications));
-            updateNotifBadge();
-        }
-
-        function updateNotifBadge() {
-            const badge = document.getElementById('notifBadge');
-            const list = document.getElementById('notifList');
-            if (window.notifications.length > 0) {
-                badge.classList.remove('hidden');
-                list.innerHTML = window.notifications.slice(0, 5).map(n => `
-                    <div class="p-1.5 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 flex justify-between items-center text-[10px]">
-                        <span>${escapeHtml(n.text)}</span>
-                        <span class="text-[8px] text-slate-400">${n.time}</span>
-                    </div>
-                `).join('');
-            } else {
-                badge.classList.add('hidden');
-                list.innerHTML = `<p class="italic text-[10px] text-slate-400">No new notifications.</p>`;
-            }
-        }
 
         function updateAuthUI() {
             const container = document.getElementById('authNavContainer');
@@ -356,45 +317,31 @@
                 container.innerHTML = `
                     <div class="flex items-center space-x-1.5">
                         <span class="text-[10px] font-semibold px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg">
-                            <i class="fa-solid fa-user mr-1"></i> ${escapeHtml(window.currentUser.username)}
+                            ${escapeHtml(window.currentUser.username)}
                         </span>
-                        <button onclick="openPostModal()" class="px-2 py-0.5 bg-blue-600 text-white rounded-lg text-[10px] font-semibold">Dashboard</button>
-                        <button onclick="logoutUser()" class="text-xs text-red-500 hover:text-red-700 font-semibold p-1" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+                        <button onclick="openPostModal()" class="px-2 py-0.5 bg-blue-600 text-white rounded-lg text-[10px] font-semibold">Post</button>
+                        <button onclick="logoutUser()" class="text-xs text-red-500 font-semibold p-1"><i class="fa-solid fa-right-from-bracket"></i></button>
                     </div>
                 `;
             } else {
                 container.innerHTML = `
-                    <button onclick="openLoginModal()" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold rounded-lg shadow-sm transition">
-                        <i class="fa-solid fa-user-shield mr-1"></i> Login / Submit
+                    <button onclick="openLoginModal()" class="px-2.5 py-1 bg-blue-600 text-white text-[11px] font-semibold rounded-lg shadow-sm">
+                        Login / Submit
                     </button>
                 `;
             }
         }
 
-        function checkUserValidity() {
-            if (window.currentUser) {
-                const now = new Date().getTime();
-                const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
-                if (now - window.currentUser.createdAt > twoDaysInMs) {
-                    addNotification("Your 2-day session has expired. Please authenticate again.");
-                    localStorage.removeItem('skillsync_user');
-                    window.currentUser = null;
-                }
-            }
-        }
-
-        // Listen for Firebase Real-time Updates
         function listenToFirestoreFeed() {
-            const q = query(collection(db, "ideas"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                window.ideas = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                renderIdeas();
-            }, (err) => {
-                console.error("Snapshot Listener Error:", err);
-            });
+            try {
+                const q = query(collection(db, "ideas"), orderBy("createdAt", "desc"));
+                onSnapshot(q, (snapshot) => {
+                    window.ideas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderIdeas();
+                });
+            } catch(e) {
+                console.error("Firebase Error:", e);
+            }
         }
 
         function renderIdeas() {
@@ -412,63 +359,40 @@
             }
 
             feed.innerHTML = window.ideas.map(idea => `
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm hover:shadow transition flex flex-col justify-between space-y-2.5">
-                    <div class="space-y-1.5">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 shadow-sm flex flex-col justify-between space-y-2">
+                    <div class="space-y-1">
                         <div class="flex items-center justify-between text-[10px] text-slate-500">
-                            <span class="font-semibold text-blue-600 dark:text-blue-400 flex items-center">
+                            <span class="font-semibold text-blue-600 dark:text-blue-400">
                                 <i class="fa-solid fa-user-circle mr-1"></i> ${escapeHtml(idea.username || 'Anonymous')}
                             </span>
                             <span class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[9px]">
-                                <i class="fa-solid fa-location-dot mr-1 text-red-500"></i> ${escapeHtml(idea.district || 'N/A')}, ${escapeHtml(idea.state || 'N/A')}
+                                ${escapeHtml(idea.district || 'N/A')}, ${escapeHtml(idea.state || 'N/A')}
                             </span>
                         </div>
-                        <h4 class="text-xs sm:text-sm font-bold tracking-tight text-slate-900 dark:text-white">${escapeHtml(idea.title || '')}</h4>
-                        <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">${escapeHtml(idea.desc || '')}</p>
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white">${escapeHtml(idea.title || '')}</h4>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300">${escapeHtml(idea.desc || '')}</p>
                     </div>
 
                     ${idea.adminReply ? `
-                        <div class="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 p-2 rounded-lg text-[10px] space-y-0.5">
-                            <p class="font-bold text-blue-700 dark:text-blue-400 flex items-center">
-                                <i class="fa-solid fa-shield-halved mr-1"></i> Go-Interactive Admin Reply:
-                            </p>
+                        <div class="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 p-2 rounded-lg text-[10px]">
+                            <p class="font-bold text-blue-700 dark:text-blue-400"><i class="fa-solid fa-shield-halved mr-1"></i> Admin Reply:</p>
                             <p class="text-slate-700 dark:text-slate-300">${escapeHtml(idea.adminReply)}</p>
                         </div>
                     ` : ''}
-
-                    <div class="pt-1.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[9px] text-slate-400">
-                        <span>Auto-expires in ${getDaysLeft(idea.createdAt)} days</span>
-                        <span class="italic font-medium text-emerald-600 dark:text-emerald-400"><i class="fa-solid fa-cloud mr-0.5"></i> Live Cloud Record</span>
-                    </div>
                 </div>
             `).join('');
         }
 
-        function getDaysLeft(createdAt) {
-            if (!createdAt) return 6;
-            const now = new Date().getTime();
-            const passed = now - createdAt;
-            const sixDays = 6 * 24 * 60 * 60 * 1000;
-            const left = Math.ceil((sixDays - passed) / (24 * 60 * 60 * 1000));
-            return left > 0 ? left : 0;
-        }
-
         function escapeHtml(str) {
-            if (!str) return '';
-            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // Initialize Application Lifecycle
         window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('skillsync_theme') === 'dark') {
-                document.documentElement.classList.add('dark');
-                document.getElementById('themeIcon').className = 'fa-solid fa-sun text-xs text-yellow-400';
-            }
-            checkUserValidity();
+            if (localStorage.getItem('skillsync_theme') === 'dark') document.documentElement.classList.add('dark');
             updateAuthUI();
-            updateNotifBadge();
             listenToFirestoreFeed();
         });
     </script>
 </body>
 </html>
-
+  
