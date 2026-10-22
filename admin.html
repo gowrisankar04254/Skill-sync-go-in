@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
@@ -160,7 +160,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Configuration
+        // Firebase Configuration (Same as index.html)
         const firebaseConfig = {
             apiKey: "AIzaSyDziwf1qZbYw3OOlNEtZHSvYRpS3tP3d5o",
             authDomain: "skill-sync-go-55e84.firebaseapp.com",
@@ -340,7 +340,7 @@
                 alert('Broadcast notification sent to public wall!');
             } catch (err) {
                 console.error("Notification broadcast error:", err);
-                alert('Failed to send announcement. Ensure "notifications" collection is allowed in Firestore rules.');
+                alert('Failed to send announcement.');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-solid fa-paper-plane mr-1"></i> Send Announcement`;
@@ -360,5 +360,3 @@
     </script>
 </body>
 </html>
-
- 
